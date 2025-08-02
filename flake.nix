@@ -13,7 +13,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, zen-browser, ... } @ inputs: {
+  outputs = { self, nixpkgs, home-manager, ... } @ inputs: {
 
     nixosConfigurations.zacml = nixpkgs.lib.nixosSystem {
       modules = [
