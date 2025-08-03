@@ -13,25 +13,41 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, ... } @ inputs: {
-
-    nixosConfigurations.zacml = nixpkgs.lib.nixosSystem {
-      modules = [
-        ./configuration.nix
-        home-manager.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          
-          home-manager.users.zacml = import ./home.nix;
-          
-          home-manager.extraSpecialArgs = {
-            inherit inputs;
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      ...
+    }@inputs:
+    {
+      nixosConfigurations = {
+        zacml =
+          let
             system = "x86_64-linux";
-          };
-        }
-      ];
-    };
+          in
+          nixpkgs.lib.nixosSystem {
+            inherit system;
 
-  };
+            modules = [
+              ./hosts/zacml
+
+              ./users/zacml/user.nix
+
+              home-manager.nixosModules.home-manager
+              {
+                home-manager.useGlobalPkgs = true;
+                home-manager.useUserPackages = true;
+
+                home-manager.users.zacml = import ./users/zacml/home.nix;
+
+                home-manager.extraSpecialArgs = {
+                  inherit inputs system;
+                };
+              }
+            ];
+          };
+      };
+
+    };
 }
