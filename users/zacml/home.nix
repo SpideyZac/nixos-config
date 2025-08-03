@@ -5,6 +5,7 @@
 {
   imports = [
     ../../home/programs
+    ../../home/tools
   ];
 
   home.username = "zacml";
