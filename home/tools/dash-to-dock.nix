@@ -4,7 +4,9 @@
   ...
 }:
 {
-  home.packages = with pkgs; lib.mkAfter [
-    gnomeExtensions.dash-to-dock
-  ];
+  home.packages =
+    with pkgs;
+    lib.mkAfter [
+      gnomeExtensions.dash-to-dock
+    ];
 }

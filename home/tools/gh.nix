@@ -4,7 +4,9 @@
   ...
 }:
 {
-  home.packages = with pkgs; lib.mkAfter [
-    gh
-  ];
+  home.packages =
+    with pkgs;
+    lib.mkAfter [
+      gh
+    ];
 }

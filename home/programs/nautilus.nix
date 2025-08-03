@@ -4,7 +4,9 @@
   ...
 }:
 {
-  home.packages = with pkgs; lib.mkAfter [
-    nautilus
-  ];
+  home.packages =
+    with pkgs;
+    lib.mkAfter [
+      nautilus
+    ];
 }
