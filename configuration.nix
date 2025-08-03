@@ -46,6 +46,7 @@
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
+  services.xserver.videoDrivers = [ "displaylink" "modesetting" ];
 
   # Enable the GNOME Desktop Environment.
   services.displayManager.gdm.enable = true;
@@ -102,7 +103,14 @@
   #  wget
     git
     gh
+    displaylink
   ];
+  
+  services.gnome.core-apps.enable = false;
+  environment.gnome.excludePackages = with pkgs; [
+    gnome-tour
+  ];
+  programs.gnome-terminal.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
