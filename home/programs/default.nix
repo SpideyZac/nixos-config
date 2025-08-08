@@ -3,5 +3,6 @@
   imports = [
     ./nautilus.nix
     ./zen.nix
+    ./vscode.nix
   ];
 }
