@@ -45,5 +45,6 @@
   environment.systemPackages = with pkgs; [
     displaylink
     nil
+    nixfmt-rfc-style
   ];
 }
