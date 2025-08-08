@@ -44,5 +44,6 @@
   # Set the system packages to be installed
   environment.systemPackages = with pkgs; [
     displaylink
+    uv
   ];
 }
