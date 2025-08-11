@@ -46,5 +46,6 @@
     displaylink
     nil
     nixfmt-rfc-style
+    zip
   ];
 }
