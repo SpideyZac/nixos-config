@@ -19,13 +19,7 @@
 
   networking.hostName = "laptop";
   networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [ 
-    2222
-    25565
-  ];
-  networking.firewall.allowedUDPPorts = [
-    25565
-  ];
+  networking.firewall.enable = false;
 
   time.timeZone = "America/Los_Angeles";
 
