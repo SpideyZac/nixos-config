@@ -12,7 +12,6 @@ in
     home.homeDirectory = "/home/mcserver";
 
     home.packages = with pkgs; [
-      miniupnpc
       zulu25
     ];
 
