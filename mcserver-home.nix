@@ -8,8 +8,8 @@ jarUrl = "https://github.com/andre-carbajal/mine-control-cli/releases/download/v
     };
 in
 {
-  home.username = "zacml";
-  home.homeDirectory = "/home/zacml";
+  home.username = "mcserver";
+  home.homeDirectory = "/home/mcserver";
 
   home.packages = with pkgs; [
     zulu25
