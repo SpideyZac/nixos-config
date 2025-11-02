@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 let
-  varsFile = builtins.readFile ./vars.local.sh;
+  varsFile = builtins.readFile /home/zacml/nixos-config/vars.local.sh;
   internalIP = builtins.head (builtins.match ".*INTERNAL_IP=([0-9\\.]+).*" varsFile);
   externalPort = builtins.head (builtins.match ".*EXTERNAL_PORT=([0-9]+).*" varsFile);
   iface = builtins.head (builtins.match ".*INTERFACE=\"([a-zA-Z0-9_\\-]+)\".*" varsFile);
@@ -56,8 +56,9 @@ in
         AllowUsers = [ "mcserver" "zacml" ];
       };
     };
-    services.systemd.services.upnp-port-mapping = {
-      description = "UPnP Port Mapping for ${externalPort}";
+
+    systemd.services.upnp-port-mapping = {
+      description = "UPnP Port Mapping for ${toString externalPort}";
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
@@ -66,65 +67,57 @@ in
         Type = "oneshot";
         RemainAfterExit = true;
         ExecStart = pkgs.writeShellScript "upnp-add-mapping" ''
-          set -e
+          set -euo pipefail
           echo "Creating UPnP port mapping: ${externalPort} -> ${internalIP}:${externalPort}"
           ${pkgs.miniupnpc}/bin/upnpc -a ${internalIP} ${externalPort} ${externalPort} TCP
           ${pkgs.miniupnpc}/bin/upnpc -a ${internalIP} ${externalPort} ${externalPort} UDP
         '';
         ExecStop = pkgs.writeShellScript "upnp-remove-mapping" ''
+          set -euo pipefail
           echo "Removing UPnP port mapping: ${externalPort}"
           ${pkgs.miniupnpc}/bin/upnpc -d ${externalPort} TCP || true
           ${pkgs.miniupnpc}/bin/upnpc -d ${externalPort} UDP || true
         '';
       };
     };
-
-    services.systemd.services.upnp-port-mapping-watchdog = {
-      description = "UPnP Port Mapping Watchdog for ${externalPort}";
+    systemd.services.upnp-port-mapping-watchdog = {
+      description = "UPnP Port Mapping Watchdog for ${toString externalPort}";
       after = [ "upnp-port-mapping.service" ];
       requires = [ "upnp-port-mapping.service" ];
+      wantedBy = [ "multi-user.target" ];
 
       serviceConfig = {
         Type = "simple";
         Restart = "always";
-        RestartSec = "300"; # Check every 5 minutes
+        RestartSec = 10;
         ExecStart = pkgs.writeShellScript "upnp-watchdog" ''
-          set -e
-          
+          set -euo pipefail
+
           while true; do
             echo "Checking UPnP port mapping status..."
-            
-            # List current mappings and check if ours exists
-            if ! ${pkgs.miniupnpc}/bin/upnpc -l | grep -q "${externalPort}.*TCP.*${internalIP}"; then
-              echo "Port mapping missing! Recreating..."
+
+            # TCP mapping
+            if ! ${pkgs.miniupnpc}/bin/upnpc -l | grep -q "TCP.*${externalPort}->${internalIP}:${externalPort}"; then
+              echo "TCP mapping missing! Recreating..."
               ${pkgs.miniupnpc}/bin/upnpc -a ${internalIP} ${externalPort} ${externalPort} TCP
             else
-              echo "Port mapping exists and is healthy"
+              echo "TCP mapping exists and is healthy"
             fi
 
-            # Check if UDP mapping exists
-            if ! ${pkgs.miniupnpc}/bin/upnpc -l | grep -q "${externalPort}.*UDP.*${internalIP}"; then
-              echo "UDP port mapping missing! Recreating..."
+            # UDP mapping
+            if ! ${pkgs.miniupnpc}/bin/upnpc -l | grep -q "UDP.*${externalPort}->${internalIP}:${externalPort}"; then
+              echo "UDP mapping missing! Recreating..."
               ${pkgs.miniupnpc}/bin/upnpc -a ${internalIP} ${externalPort} ${externalPort} UDP
             else
-              echo "UDP port mapping exists and is healthy"
+              echo "UDP mapping exists and is healthy"
             fi
 
-            sleep 300  # 5 minutes
+            sleep 300
           done
         '';
       };
     };
 
-    services.systemd.timers.upnp-port-mapping-check = {
-      description = "Timer for UPnP Port Mapping Check";
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnBootSec = "2min";
-        OnUnitActiveSec = "5min";
-        Unit = "upnp-port-mapping-watchdog.service";
-      };
-    };
     users.users.zacml = {
       isNormalUser = true;
       description = "Zachary Lesser";
