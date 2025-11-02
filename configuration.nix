@@ -53,7 +53,7 @@
       PermitRootLogin = "no";
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
-      AllowUsers = [ "mcserver" ];
+      AllowUsers = [ "mcserver" "zacml" ];
     };
   };
 
