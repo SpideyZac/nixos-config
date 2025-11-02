@@ -15,7 +15,7 @@ in
     zulu25
   ];
 
-  home.file."MineControlCLI/minecontrol.properties".text = ''
+  home.file."MineControlCli/minecontrol.properties".text = ''
     #MineControl CLI - User Configuration
     #Sat Nov 01 23:09:42 PDT 2025
     eula.auto-accept=true
@@ -29,7 +29,7 @@ in
   '';
 
     
-    home.file."MineControlCLI/mine-control-cli-2.2.4.jar".source = myjar;
+    home.file."MineControlCli/mine-control-cli-2.2.4.jar".source = myjar;
   
   home.stateVersion = "25.05";
 }
