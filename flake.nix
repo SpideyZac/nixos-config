@@ -22,8 +22,7 @@
             useGlobalPkgs = true;
             useUserPackages = true;
             users = {
-              zacml = import ./zacml-home.nix;
-              mcserver = import ./mcserver-home.nix;
+              mcserver = import ./home.nix;
             };
             extraSpecialArgs = { inherit inputs; };
           };

@@ -1,20 +1,17 @@
 { pkgs, nixpkgs, ... }:
 
 let
-  jarUrl = "https://github.com/andre-carbajal/mine-control-cli/releases/download/v2.2.4/mine-control-cli-2.2.4.jar";
-  jarSha256 = "b72d1547a42df73b94386505f8e38057a7df7fce4e9baab82868da600c0b4995";
-  myjar = pkgs.fetchurl {
-    url = jarUrl;
-    sha256 = jarSha256;
+  mineControlJarUrl = "https://github.com/andre-carbajal/mine-control-cli/releases/download/v2.2.4/mine-control-cli-2.2.4.jar";
+  mineControlJarSha256 = "b72d1547a42df73b94386505f8e38057a7df7fce4e9baab82868da600c0b4995";
+  mineControlJar = pkgs.fetchurl {
+    url = mineControlJarUrl;
+    sha256 = mineControlJarSha256;
   };
 in
   {
     home = {
       username = "mcserver";
       homeDirectory = "/home/mcserver";
-      packages = with pkgs; [
-        zulu25
-      ];
       file = {
         "MineControlCli/minecontrol.properties".text = ''
           #MineControl CLI - User Configuration
@@ -28,7 +25,7 @@ in
           potato-peeler.chunk-inhabited-time=200
           update.check-on-startup=true
         '';
-        "MineControlCli/mine-control-cli-2.2.4.jar".source = myjar;
+        "MineControlCli/mine-control-cli-2.2.4.jar".source = mineControlJar;
       };
       stateVersion = "25.05";
     };
