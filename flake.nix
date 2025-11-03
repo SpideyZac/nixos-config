@@ -18,13 +18,15 @@
 
         home-manager.nixosModules.home-manager
         {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-
-          home-manager.users.zacml = import ./zacml-home.nix;
-          home-manager.users.mcserver = import ./mcserver-home.nix;
-
-          home-manager.extraSpecialArgs = { inherit inputs; };
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            users = {
+              zacml = import ./zacml-home.nix;
+              mcserver = import ./mcserver-home.nix;
+            };
+            extraSpecialArgs = { inherit inputs; };
+          };
         }
       ];
     };
