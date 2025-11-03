@@ -97,8 +97,6 @@ in
 
         serviceConfig = {
           Type = "simple";
-          Restart = "always";
-          RestartSec = 60;
 
           ExecStart = pkgs.writeShellScript "upnp-maintain-mapping" ''
             set -euo pipefail
@@ -110,6 +108,9 @@ in
               sleep 300
             done
           '';
+
+          Restart = "always";
+          RestartSec = 60;
         };
       };
       upnp-port-mapping-cleanup = {
@@ -136,23 +137,53 @@ in
         wantedBy = [ "multi-user.target" ];
 
         serviceConfig = {
-          Type = "forking";
+          Type = "simple";
           User = "mcserver";
           WorkingDirectory = "/home/mcserver";
 
           ExecStart = pkgs.writeShellScript "start-minecontrol" ''
             set -euo pipefail
 
-            if ${pkgs.tmux}/bin/tmux has-session -t minecontrol 2>/dev/null; then
-              ${pkgs.tmux}/bin/tmux kill-session -t minecontrol
+            SESSION=minecontrol
+            TMUX=${pkgs.tmux}/bin/tmux
+
+            if $TMUX has-session -t $SESSION 2>/dev/null; then
+              $TMUX kill-session -t $SESSION
             fi
 
-            ${pkgs.tmux}/bin/tmux new-session -d -s minecontrol \
+            $TMUX new-session -d -s $SESSION \
               "java -jar /home/mcserver/MineControlCli/mine-control-cli-2.2.4.jar"
             
+            echo "Waiting for MineControl to initialize..."
             sleep 5
             
-            ${pkgs.tmux}/bin/tmux send-keys -t minecontrol "ss" C-m
+            echo "Sending 'ss' command to start server"
+            $TMUX send-keys -t $SESSION "ss" C-m
+
+            echo "Monitoring session for crashes..."
+            while true; do
+              if ! $TMUX has-session -t $SESSION 2>/dev/null; then
+                echo "Session died unexpectedly, exiting to trigger systemd restart"
+                exit 1
+              fi
+
+              OUT=$($TMUX capture-pane -pt $SESSION -S -20 -E -1 2>/dev/null | tail -n 1 || echo "")
+              
+              if [[ "$OUT" =~ "Press enter to exit" ]]; then
+                echo "Detected 'Press enter to exit' - server has stopped!"
+                echo "Pressing enter to clear prompt..."
+                $TMUX send-keys -t $SESSION C-m
+                
+                sleep 2
+                
+                echo "Restarting server with 'ss' command..."
+                $TMUX send-keys -t $SESSION "ss" C-m
+                
+                echo "Server restart initiated, continuing monitoring..."
+              fi
+              
+              sleep 10
+            done
           '';
 
           ExecStop = pkgs.writeShellScript "stop-minecontrol" ''
